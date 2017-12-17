@@ -1,0 +1,44 @@
+# Maintainer: None
+pkgname=kiwiirc
+pkgver=17.10.06.1
+pkgrel=1
+pkgdesc="Kiwi IRC server"
+arch=('i686' 'x86_64')
+url="https://www.kiwiirc.com"
+license=('Apache License 2.0')
+backup=('etc/kiwiirc/client.json' 'etc/kiwiirc/config.conf')
+install=kiwiirc.install
+conflicts=(kiwiirc-git)
+
+source=(kiwiirc.service kiwiirc.install kiwiirc.conf.sysusers)
+source_i686+=(kiwiirc-i686-$pkgver.zip::https://kiwiirc.com/downloads/kiwiirc_${pkgver}_linux_386.zip)
+source_x86_64+=(kiwiirc-x86_64-$pkgver.zip::https://kiwiirc.com/downloads/kiwiirc_${pkgver}_linux_amd64.zip)
+
+sha1sums=('ee22e99689fab8ee15808c497e3e20cab4129987'
+          '9400f2ca9daa883afb0b8be26fef9f41a5ffdf6d'
+          'a2f5db846baa00298ace29e942b3d4bff08ce849')
+sha1sums_i686=('a1e626f3168aa382cabf8478061995342a5e05cf')
+sha1sums_x86_64=('0638f1eed210f2f48da42a40f8a0a35810658ece')
+
+package() {
+  declare -A _arch=([i686]='386' [x86_64]='amd64')
+
+  # Copy systemd files
+  install -Dm644 kiwiirc.service $pkgdir/usr/lib/systemd/system/kiwiirc.service
+  install -Dm644 kiwiirc.conf.sysusers $pkgdir/usr/lib/sysusers.d/kiwiirc.conf
+
+  # Copy binary and config
+  install -Dm755 $srcdir/kiwiirc_linux_${_arch[${CARCH}]}/kiwiirc $pkgdir/usr/bin/kiwiirc
+  install -Dm644 $srcdir/kiwiirc_linux_${_arch[${CARCH}]}/config.conf.example $pkgdir/etc/kiwiirc/config.conf
+
+  # Copy client files
+  install -dm755 $pkgdir/usr/share/kiwiirc/
+  cp -rd $srcdir/kiwiirc_linux_${_arch[${CARCH}]}/www/* $pkgdir/usr/share/kiwiirc/
+
+  # Move client json to etc and symlink
+  mv $pkgdir/usr/share/kiwiirc/static/config.json $pkgdir/etc/kiwiirc/client.json
+  ln -s /etc/kiwiirc/client.json $pkgdir/usr/share/kiwiirc/static/config.json
+
+  # Set correct webroot in config
+  sed -i -e 's:webroot = www/:webroot = /usr/share/kiwiirc/:' $pkgdir/etc/kiwiirc/config.conf
+}

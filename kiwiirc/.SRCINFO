@@ -1,0 +1,25 @@
+pkgbase = kiwiirc
+	pkgdesc = Kiwi IRC server
+	pkgver = 17.10.06.1
+	pkgrel = 1
+	url = https://www.kiwiirc.com
+	install = kiwiirc.install
+	arch = i686
+	arch = x86_64
+	license = Apache License 2.0
+	conflicts = kiwiirc-git
+	backup = etc/kiwiirc/client.json
+	backup = etc/kiwiirc/config.conf
+	source = kiwiirc.service
+	source = kiwiirc.install
+	source = kiwiirc.conf.sysusers
+	sha1sums = ee22e99689fab8ee15808c497e3e20cab4129987
+	sha1sums = 9400f2ca9daa883afb0b8be26fef9f41a5ffdf6d
+	sha1sums = a2f5db846baa00298ace29e942b3d4bff08ce849
+	source_i686 = kiwiirc-i686-17.10.06.1.zip::https://kiwiirc.com/downloads/kiwiirc_17.10.06.1_linux_386.zip
+	sha1sums_i686 = a1e626f3168aa382cabf8478061995342a5e05cf
+	source_x86_64 = kiwiirc-x86_64-17.10.06.1.zip::https://kiwiirc.com/downloads/kiwiirc_17.10.06.1_linux_amd64.zip
+	sha1sums_x86_64 = 0638f1eed210f2f48da42a40f8a0a35810658ece
+
+pkgname = kiwiirc
+
