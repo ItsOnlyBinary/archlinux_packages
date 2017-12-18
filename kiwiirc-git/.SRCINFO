@@ -1,0 +1,27 @@
+pkgbase = kiwiirc-git
+	pkgdesc = Kiwi IRC server
+	pkgver = r839.819c56f
+	pkgrel = 1
+	url = https://www.kiwiirc.com
+	install = kiwiirc.install
+	arch = i686
+	arch = x86_64
+	license = Apache License 2.0
+	makedepends = git
+	makedepends = go
+	makedepends = nodejs
+	makedepends = yarn
+	conflicts = kiwiirc
+	backup = etc/kiwiirc/client.json
+	backup = etc/kiwiirc/config.conf
+	source = kiwiirc.service
+	source = kiwiirc.install
+	source = kiwiirc.conf.sysusers
+	source = config.patch
+	sha1sums = ee22e99689fab8ee15808c497e3e20cab4129987
+	sha1sums = 9400f2ca9daa883afb0b8be26fef9f41a5ffdf6d
+	sha1sums = a2f5db846baa00298ace29e942b3d4bff08ce849
+	sha1sums = 5afb9a098053d6f271ef747e98b7c48b31de6524
+
+pkgname = kiwiirc-git
+

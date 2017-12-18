@@ -1,0 +1,72 @@
+# Maintainer: None
+pkgname=kiwiirc-git
+pkgver=r839.819c56f
+pkgrel=1
+pkgdesc="Kiwi IRC server"
+arch=('i686' 'x86_64')
+url="https://www.kiwiirc.com"
+license=('Apache License 2.0')
+backup=('etc/kiwiirc/client.json' 'etc/kiwiirc/config.conf')
+makedepends=('git' 'go' 'nodejs' 'yarn')
+install=kiwiirc.install
+conflicts=(kiwiirc)
+
+source=(kiwiirc.service kiwiirc.install kiwiirc.conf.sysusers config.patch)
+sha1sums=('ee22e99689fab8ee15808c497e3e20cab4129987'
+          '9400f2ca9daa883afb0b8be26fef9f41a5ffdf6d'
+          'a2f5db846baa00298ace29e942b3d4bff08ce849'
+          '5afb9a098053d6f271ef747e98b7c48b31de6524')
+
+pkgver() {
+  cd $srcdir/$pkgname
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd $srcdir
+  mkdir -p go
+  export GOPATH=$srcdir/go
+
+  # Prepare client files
+  git clone https://github.com/kiwiirc/kiwiirc.git $srcdir/$pkgname
+  cd $srcdir/$pkgname
+  yarn install --no-progress
+
+  # Prepare server files
+  go get github.com/kiwiirc/webircgateway
+}
+
+build() {
+  cd $srcdir/$pkgname
+  yarn run build
+
+  cd $srcdir/go/src/github.com/kiwiirc/webircgateway
+  export GOPATH=$srcdir/go
+  go build -o kiwiirc main.go
+}
+
+package() {
+  declare -A _arch=([i686]='386' [x86_64]='amd64')
+
+  # Copy systemd files
+  install -Dm644 kiwiirc.service $pkgdir/usr/lib/systemd/system/kiwiirc.service
+  install -Dm644 kiwiirc.conf.sysusers $pkgdir/usr/lib/sysusers.d/kiwiirc.conf
+
+  # Copy binary, config & license
+  install -Dm755 $srcdir/go/src/github.com/kiwiirc/webircgateway/kiwiirc $pkgdir/usr/bin/kiwiirc
+  install -Dm644 $srcdir/go/src/github.com/kiwiirc/webircgateway/config.conf.example $pkgdir/etc/kiwiirc/config.conf
+  install -Dm644 $srcdir/$pkgname/LICENSE $pkgdir/usr/share/licenses/kiwiirc/LICENSE
+
+  # Copy client files
+  install -dm755 $pkgdir/usr/share/kiwiirc/
+  cp -rd $srcdir/$pkgname/dist/* $pkgdir/usr/share/kiwiirc/
+  rm $pkgdir/usr/share/kiwiirc/module_filesize_report.html
+
+  # Move client json to etc and symlink
+  mv $pkgdir/usr/share/kiwiirc/static/config.json $pkgdir/etc/kiwiirc/client.json
+  ln -s /etc/kiwiirc/client.json $pkgdir/usr/share/kiwiirc/static/config.json
+
+  # Set correct webroot in config
+  cd $pkgdir/etc/kiwiirc/
+  git apply $srcdir/config.patch
+}
