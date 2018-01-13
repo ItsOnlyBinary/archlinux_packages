@@ -1,0 +1,47 @@
+# Maintainer: None
+pkgname=kiwiirc-webfiles-git
+pkgver=r868.f7b56cb
+pkgrel=1
+pkgdesc="Kiwi IRC server"
+arch=('i686' 'x86_64')
+url="https://www.kiwiirc.com"
+license=('Apache License 2.0')
+backup=('etc/kiwiirc/client.json')
+makedepends=('git' 'go' 'nodejs' 'yarn')
+conflicts=(kiwiirc kiwiirc-git)
+
+pkgver() {
+  cd $srcdir/$pkgname
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd $srcdir
+
+  # Prepare client files
+  git clone https://github.com/kiwiirc/kiwiirc.git $srcdir/$pkgname
+  cd $srcdir/$pkgname
+  yarn install --no-progress
+}
+
+build() {
+  cd $srcdir/$pkgname
+  yarn run build
+}
+
+package() {
+  cd $srcdir
+  
+  # Copy license file
+  install -Dm644 $srcdir/$pkgname/LICENSE $pkgdir/usr/share/licenses/kiwiirc-webfiles-git/LICENSE
+
+  # Copy client files
+  install -dm755 $pkgdir/usr/share/kiwiirc/
+  cp -rd $srcdir/$pkgname/dist/* $pkgdir/usr/share/kiwiirc/
+  rm $pkgdir/usr/share/kiwiirc/module_filesize_report.html
+
+  # Move client json to etc and symlink
+  install -dm755 $pkgdir/etc/kiwiirc/
+  mv $pkgdir/usr/share/kiwiirc/static/config.json $pkgdir/etc/kiwiirc/client.json
+  ln -s $pkgdir/etc/kiwiirc/client.json $pkgdir/usr/share/kiwiirc/static/config.json
+}
