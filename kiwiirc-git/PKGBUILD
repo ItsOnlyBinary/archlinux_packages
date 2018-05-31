@@ -1,6 +1,6 @@
 # Maintainer: None
 pkgname=kiwiirc-git
-pkgver=r839.819c56f
+pkgver=r1443.3d718fb
 pkgrel=1
 pkgdesc="Kiwi IRC server"
 arch=('i686' 'x86_64')
@@ -60,7 +60,7 @@ package() {
   # Copy client files
   install -dm755 $pkgdir/usr/share/kiwiirc/
   cp -rd $srcdir/$pkgname/dist/* $pkgdir/usr/share/kiwiirc/
-  rm $pkgdir/usr/share/kiwiirc/module_filesize_report.html
+  rm -f $pkgdir/usr/share/kiwiirc/module_filesize_report.html
 
   # Move client json to etc and symlink
   mv $pkgdir/usr/share/kiwiirc/static/config.json $pkgdir/etc/kiwiirc/client.json

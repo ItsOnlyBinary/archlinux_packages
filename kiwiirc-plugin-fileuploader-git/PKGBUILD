@@ -1,6 +1,6 @@
 # Maintainer: None
 pkgname=kiwiirc-plugin-fileuploader-git
-pkgver=r47.60df679
+pkgver=r61.e9df8f0
 pkgrel=1
 pkgdesc="Kiwi IRC Plugin fileuploader"
 arch=('i686' 'x86_64')

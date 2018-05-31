@@ -1,6 +1,6 @@
 # Maintainer: None
 pkgname=kiwiirc-gateway-git
-pkgver=r134.4fc1d15
+pkgver=r157.ef93dab
 pkgrel=1
 pkgdesc="Kiwi IRC server"
 arch=('i686' 'x86_64')

@@ -1,6 +1,6 @@
 pkgbase = kiwiirc-git
 	pkgdesc = Kiwi IRC server
-	pkgver = r839.819c56f
+	pkgver = r1443.3d718fb
 	pkgrel = 1
 	url = https://www.kiwiirc.com
 	install = kiwiirc.install
