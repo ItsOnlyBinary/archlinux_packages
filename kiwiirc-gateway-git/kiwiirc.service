@@ -10,5 +10,8 @@ ExecReload=/usr/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=always
 
+RuntimeDirectory=kiwiirc
+RuntimeDirectoryMode=0750
+
 [Install]
 WantedBy=multi-user.target

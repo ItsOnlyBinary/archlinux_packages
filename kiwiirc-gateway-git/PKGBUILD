@@ -12,7 +12,7 @@ install=kiwiirc.install
 conflicts=(kiwiirc kiwiirc-git)
 
 source=(kiwiirc.service kiwiirc.install kiwiirc.conf.sysusers config.patch)
-sha1sums=('ee22e99689fab8ee15808c497e3e20cab4129987'
+sha1sums=('03cbabcc7a480bdfe921e577f80b186cddf19740'
           '9b0df774f27558b93e4bd2ecbc359a92200bbf6e'
           'a2f5db846baa00298ace29e942b3d4bff08ce849'
           '5afb9a098053d6f271ef747e98b7c48b31de6524')
