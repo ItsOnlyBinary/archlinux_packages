@@ -1,0 +1,54 @@
+# Maintainer: None
+pkgname=kiwiirc-uploadserver-git
+pkgver=r61.e9df8f0
+pkgrel=1
+pkgdesc="Kiwi IRC upload server"
+arch=('i686' 'x86_64')
+url="https://www.kiwiirc.com"
+license=('Apache License 2.0')
+backup=('etc/kiwiirc/uploadserver.env')
+makedepends=('git' 'go' 'nodejs' 'yarn')
+install=kiwiirc-uploadserver.install
+conflicts=(kiwiirc kiwiirc-git)
+
+source=(kiwiirc-uploadserver.service kiwiirc-uploadserver.install kiwiirc-uploadserver.conf.sysusers)
+sha1sums=('2f0e29fb7561e35aac9c66bd34ca92a1ef15a7f7'
+          'eb827d5b85e78a3ff0210865aef54dba036ba92e'
+          'a2f5db846baa00298ace29e942b3d4bff08ce849')
+
+pkgver() {
+  cd $srcdir/go/src/github.com/kiwiirc/plugin-fileuploader
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd $srcdir
+  mkdir -p go
+  export GOPATH=$srcdir/go
+
+  # Prepare server files
+  go get github.com/kiwiirc/plugin-fileuploader
+}
+
+build() {
+  cd $srcdir/go/src/github.com/kiwiirc/plugin-fileuploader
+  export GOPATH=$srcdir/go
+  go build -o kiwiirc-uploadserver
+}
+
+package() {
+  cd $srcdir
+  
+  # Create a local usr dir for the uploads.db
+  install -dm755 $pkgdir/usr/local/kiwiirc/
+  install -Dm600 $srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/.env.example $pkgdir/etc/kiwiirc/uploadserver.env
+  ln -s /etc/kiwiirc/uploadserver.env $pkgdir/usr/local/kiwiirc/.env
+  
+  # Copy systemd files
+  install -Dm644 kiwiirc-uploadserver.service $pkgdir/usr/lib/systemd/system/kiwiirc-uploadserver.service
+  install -Dm644 kiwiirc-uploadserver.conf.sysusers $pkgdir/usr/lib/sysusers.d/kiwiirc-uploadserver.conf
+
+  # Copy binary & license
+  install -Dm755 $srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/kiwiirc-uploadserver $pkgdir/usr/bin/kiwiirc-uploadserver
+  install -Dm644 $srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/LICENSE $pkgdir/usr/share/licenses/kiwiirc-fileuploader/LICENSE
+}

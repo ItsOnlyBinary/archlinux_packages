@@ -1,0 +1,15 @@
+[Unit]
+Description=KiwiIRC uploadserver
+After=network.target
+
+[Service]
+User=kiwiirc
+Group=kiwiirc
+ExecStart=/usr/bin/kiwiirc-uploadserver
+ExecReload=/usr/bin/kill -HUP $MAINPID
+WorkingDirectory=/usr/local/kiwiirc/
+KillMode=process
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

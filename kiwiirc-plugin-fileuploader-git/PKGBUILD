@@ -1,0 +1,39 @@
+# Maintainer: None
+pkgname=kiwiirc-plugin-fileuploader-git
+pkgver=r47.60df679
+pkgrel=1
+pkgdesc="Kiwi IRC Plugin fileuploader"
+arch=('i686' 'x86_64')
+url="https://www.kiwiirc.com"
+license=('Apache License 2.0')
+makedepends=('git' 'nodejs' 'yarn')
+
+pkgver() {
+  cd $srcdir/$pkgname
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd $srcdir
+
+  # Prepare client files
+  git clone https://github.com/kiwiirc/plugin-fileuploader.git $srcdir/$pkgname
+  cd $srcdir/$pkgname/fileuploader-kiwiirc-plugin
+  yarn install --no-progress
+}
+
+build() {
+  cd $srcdir/$pkgname/fileuploader-kiwiirc-plugin
+  yarn run build
+}
+
+package() {
+  cd $srcdir
+  
+  # Copy license file
+  install -Dm644 $srcdir/$pkgname/LICENSE $pkgdir/usr/share/licenses/kiwiirc-plugin-fileuploader-git/LICENSE
+
+  # Copy client files
+  install -dm755 $pkgdir/usr/share/kiwiirc/plugins/
+  install -Dm644 $srcdir/$pkgname/fileuploader-kiwiirc-plugin/dist/main.js $pkgdir/usr/share/kiwiirc/plugins/fileuploader.js
+}
