@@ -1,13 +1,13 @@
 # Maintainer: None
 pkgname=kiwiirc-uploadserver-git
-pkgver=r61.e9df8f0
+pkgver=r68.bff094a
 pkgrel=1
 pkgdesc="Kiwi IRC upload server"
 arch=('i686' 'x86_64')
 url="https://www.kiwiirc.com"
 license=('Apache License 2.0')
 backup=('etc/kiwiirc/uploadserver.env')
-makedepends=('git' 'go' 'nodejs' 'yarn')
+makedepends=('git' 'go' 'nodejs' 'yarn' 'dep')
 install=kiwiirc-uploadserver.install
 conflicts=(kiwiirc kiwiirc-git)
 
@@ -28,6 +28,9 @@ prepare() {
 
   # Prepare server files
   go get github.com/kiwiirc/plugin-fileuploader
+  
+  cd $srcdir/go/src/github.com/kiwiirc/plugin-fileuploader
+  dep ensure
 }
 
 build() {

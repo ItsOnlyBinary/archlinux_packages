@@ -1,6 +1,6 @@
 pkgbase = kiwiirc-uploadserver-git
 	pkgdesc = Kiwi IRC upload server
-	pkgver = r61.e9df8f0
+	pkgver = r68.bff094a
 	pkgrel = 1
 	url = https://www.kiwiirc.com
 	install = kiwiirc-uploadserver.install
@@ -11,6 +11,7 @@ pkgbase = kiwiirc-uploadserver-git
 	makedepends = go
 	makedepends = nodejs
 	makedepends = yarn
+	makedepends = dep
 	conflicts = kiwiirc
 	conflicts = kiwiirc-git
 	backup = etc/kiwiirc/uploadserver.env
