@@ -1,5 +1,5 @@
 [Unit]
-Description=KiwiIRC uploadserver
+Description=KiwiIRC Plugin fileuploader
 After=network.target
 
 [Service]

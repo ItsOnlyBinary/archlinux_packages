@@ -2,38 +2,64 @@
 pkgname=kiwiirc-plugin-fileuploader-git
 pkgver=r68.bff094a
 pkgrel=1
-pkgdesc="Kiwi IRC Plugin fileuploader"
+pkgdesc="Kiwi IRC plugin fileuploader"
 arch=('i686' 'x86_64')
 url="https://www.kiwiirc.com"
 license=('Apache License 2.0')
-makedepends=('git' 'nodejs' 'yarn')
+backup=('etc/kiwiirc/plugin-fileuploader.env')
+makedepends=('git' 'go' 'nodejs' 'yarn' 'dep')
+install=kiwiirc-plugin-fileuploader.install
+
+source=(kiwiirc-fileuploader.service kiwiirc-plugin-fileuploader.install kiwiirc-plugin-fileuploader.conf.sysusers)
+sha256sums=('c41f5e13d74e72dfaf3010c636ea2a4312df64261bcf5fa49ae8a4b55efaa9df'
+            '4dad9c3433c06e56a2a43c843b78daaaec6d9c11698ba60a9e5a0d58762c8225'
+            'dad983d9f135ff642788d5d42569b92b5ce1312df95c21b01703bc727ad6c22b')
 
 pkgver() {
-  cd $srcdir/$pkgname
+  cd "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader"
   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 prepare() {
-  cd $srcdir
+  cd "$srcdir"
+  mkdir -p "$srcdir/go"
+  export GOPATH="$srcdir/go"
 
-  # Prepare client files
-  git clone https://github.com/kiwiirc/plugin-fileuploader.git $srcdir/$pkgname
-  cd $srcdir/$pkgname/fileuploader-kiwiirc-plugin
+  # Prepare server files
+  go get github.com/kiwiirc/plugin-fileuploader
+  
+  cd "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader"
+  dep ensure
+  
+  cd "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/fileuploader-kiwiirc-plugin"
   yarn install --no-progress
 }
 
 build() {
-  cd $srcdir/$pkgname/fileuploader-kiwiirc-plugin
+  cd "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader"
+  go build -o kiwiirc-fileuploader
+  
+  cd "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/fileuploader-kiwiirc-plugin"
   yarn run build
 }
 
 package() {
-  cd $srcdir
+  cd "$srcdir"
   
-  # Copy license file
-  install -Dm644 $srcdir/$pkgname/LICENSE $pkgdir/usr/share/licenses/kiwiirc-plugin-fileuploader-git/LICENSE
+  # Create a local usr dir for the uploads.db
+  install -dm755 "$pkgdir/usr/local/kiwiirc/"
+  install -Dm600 "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/.env.example" "$pkgdir/etc/kiwiirc/plugin-fileuploader.env"
+  ln -s /etc/kiwiirc/plugin-fileuploader.env "$pkgdir/usr/local/kiwiirc/.env"
+  
+  # Copy systemd files
+  install -Dm644 kiwiirc-fileuploader.service "$pkgdir/usr/lib/systemd/system/kiwiirc-fileuploader.service"
+  install -Dm644 kiwiirc-plugin-fileuploader.conf.sysusers "$pkgdir/usr/lib/sysusers.d/kiwiirc-plugin-fileuploader.conf"
 
+  # Copy binary & license
+  install -Dm755 "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/kiwiirc-fileuploader" "$pkgdir/usr/bin/kiwiirc-fileuploader"
+  install -Dm644 "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/LICENSE" "$pkgdir/usr/share/licenses/kiwiirc-plugin-fileuploader/LICENSE"
+  
   # Copy client files
-  install -dm755 $pkgdir/usr/share/kiwiirc/plugins/
-  install -Dm644 $srcdir/$pkgname/fileuploader-kiwiirc-plugin/dist/main.js $pkgdir/usr/share/kiwiirc/plugins/fileuploader.js
+  install -dm755 "$pkgdir/usr/share/kiwiirc/plugins/fileuploader/"
+  install -Dm644 "$srcdir/go/src/github.com/kiwiirc/plugin-fileuploader/fileuploader-kiwiirc-plugin/dist/"* "$pkgdir/usr/share/kiwiirc/plugins/fileuploader/"
 }

@@ -8,5 +8,5 @@ post_upgrade() {
 }
 
 pre_remove() {
-  systemctl disable kiwiirc-uploadserver.service
+  systemctl disable kiwiirc-fileuploader.service
 }

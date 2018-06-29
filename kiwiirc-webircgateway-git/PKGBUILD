@@ -1,0 +1,57 @@
+# Maintainer: None
+pkgname=kiwiirc-webircgateway-git
+pkgver=r175.8466729
+pkgrel=1
+pkgdesc="Kiwi IRC webircgateway"
+arch=('i686' 'x86_64')
+url="https://www.kiwiirc.com"
+license=('Apache License 2.0')
+backup=('etc/kiwiirc/config.conf')
+makedepends=('git' 'go' 'nodejs' 'yarn')
+install=kiwiirc-webircgateway-git.install
+conflicts=(kiwiirc)
+
+source=(kiwiirc.service kiwiirc-webircgateway-git.install kiwiirc-webircgateway-git.conf.sysusers config.patch)
+sha256sums=('1249bad3277209fe14e57e2ea25c15e6670274a0f0e53bf90b7ec1144936ab36'
+            'b5270dc1893e57d5aa6ce8cacb779a89d62d101f0fadbaf9a5f59fd04619535e'
+            'dad983d9f135ff642788d5d42569b92b5ce1312df95c21b01703bc727ad6c22b'
+            'db1a7957f1c15c038903900c8d8942472168f37e4b4253cf8183203907e97735')
+
+pkgver() {
+  cd "$srcdir/go/src/github.com/kiwiirc/webircgateway"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "$srcdir"
+  mkdir -p "$srcdir/go"
+  export GOPATH="$srcdir/go"
+
+  # Prepare server files
+  go get github.com/kiwiirc/webircgateway
+  
+  cd "$srcdir/go/src/github.com/kiwiirc/webircgateway"
+  dep ensure
+}
+
+build() {
+  cd "$srcdir/go/src/github.com/kiwiirc/webircgateway"
+  go build -o kiwiirc main.go
+}
+
+package() {
+  cd "$srcdir"
+  
+  # Copy systemd files
+  install -Dm644 kiwiirc.service "$pkgdir/usr/lib/systemd/system/kiwiirc.service"
+  install -Dm644 kiwiirc-webircgateway-git.conf.sysusers "$pkgdir/usr/lib/sysusers.d/kiwiirc-webircgateway-git.conf"
+
+  # Copy binary, config & license
+  install -Dm755 "$srcdir/go/src/github.com/kiwiirc/webircgateway/kiwiirc" "$pkgdir/usr/bin/kiwiirc"
+  install -Dm600 "$srcdir/go/src/github.com/kiwiirc/webircgateway/config.conf.example" "$pkgdir/etc/kiwiirc/config.conf"
+  install -Dm644 "$srcdir/go/src/github.com/kiwiirc/webircgateway/LICENSE" "$pkgdir/usr/share/licenses/kiwiirc-gateway-git/LICENSE"
+
+  # Set correct webroot in config
+  cd "$pkgdir/etc/kiwiirc/"
+  git apply "$srcdir/config.patch"
+}

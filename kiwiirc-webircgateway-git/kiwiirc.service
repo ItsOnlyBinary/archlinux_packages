@@ -1,5 +1,5 @@
 [Unit]
-Description=KiwiIRC webircgateway
+Description=Kiwi IRC webircgateway
 After=network.target
 
 [Service]
@@ -7,8 +7,12 @@ User=kiwiirc
 Group=kiwiirc
 ExecStart=/usr/bin/kiwiirc --config=/etc/kiwiirc/config.conf
 ExecReload=/usr/bin/kill -HUP $MAINPID
+WorkingDirectory=/usr/local/kiwiirc/
 KillMode=process
 Restart=always
+
+RuntimeDirectory=kiwiirc
+RuntimeDirectoryMode=0750
 
 [Install]
 WantedBy=multi-user.target
